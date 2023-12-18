@@ -1,0 +1,57 @@
+# Gemini Pro starting (general LLM)
+# 2 rounds of fine tuning (GOLD)
+# Fine tuning dataset:
+#  - "Leetcode" (problem, solution)
+#  - 15k problems
+#  - 30M code samples
+# Different models are finetuned with different
+# hyperparams
+
+#######################################
+
+# Code Ranking
+# Code Search
+# Code Generation
+# Filter wrong code
+# Clustering similar code samples
+# Program input generation
+
+# Input: code problem
+# Multiple generations for the code
+
+# LLM Inference:
+#  - Multiple models
+#  - Multiple attempts (10)
+#  - 1M code samples per problem
+#  - Randomized temperature: range based
+
+# Prompt:
+# - Code problem
+# - Problem difficulty rating (randomized)
+# - Categorical code tags (randomized)
+
+# Supported programming lang:
+#  - C++
+
+# Evaluation:
+# - Does any of these 10 solutions solve
+#   the problem?
+# - Unit testing: 1+
+
+# 1. Filter wrong code:
+# - Does not compile
+# - Does not produce expected output
+
+# 2. Clustering:
+# - Runtime behavior: outputs of it is the
+#   cluster labels
+# - Winning clusters: 10 largest
+
+# 3. Scoring: [0,1]
+# Score all the outputs from the 10 biggest
+# clusters.
+# Choose highest score sample from each cluster
+# Submit the 10 winners.
+
+# Test set:
+# 77 problems
