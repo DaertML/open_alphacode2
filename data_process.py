@@ -4,8 +4,12 @@ import requests
 import pandas as pd
 from io import StringIO
 from contextlib import redirect_stdout
+import pickle
 
 skip_samples = ["HAS-USER-INPUT","ERROR-DURING-EVAL"]
+
+def has_flask(code):
+    return "flask" in code
 
 def has_google(code):
     return "google.com" in code
@@ -85,13 +89,6 @@ def wrap_code_def(code):
             res += "\t"+line + "\n"
     return res
 
-def llamacpp_generate(url, prompt):
-    headers = {"Content-Type": "application/json"}
-    data = {"prompt": prompt}
-    res = requests.post(url=url, data=data, headers=headers)
-    print(res.json())
-    return res
-
 def get_py_function(code):
     loc = code.split("\n")
     res = ""
@@ -125,6 +122,10 @@ def get_evaluation(code, func_params, output):
     obtained_out = get_code_output(code, func_params)
     return obtained_out == output
 
+def save_object(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(list(obj), outp, pickle.HIGHEST_PROTOCOL)
+
 sample_size = 7500
 
 data = pd.read_parquet("./data/train-00000-of-00001-8b6e212f3e1ece96.parquet")
@@ -142,7 +143,7 @@ cleaned_code_truth = []
 cleaned_code_output = []
 
 for i, code_elem in enumerate(code_truth):
-    if has_google(code_elem) or has_requests(code_elem) or has_bignumber(code_elem, 4) or has_turtle(code_elem) or has_ml(code_elem) or has_smtp(code_elem) or has_nested_for(code_elem, 1) or has_server(code_elem) or has_user_input(code_elem) or has_pygame(code_elem) or has_url(code_elem) or has_tk(code_elem) or has_while_true(code_elem):
+    if has_flask(code_elem) or has_google(code_elem) or has_requests(code_elem) or has_bignumber(code_elem, 4) or has_turtle(code_elem) or has_ml(code_elem) or has_smtp(code_elem) or has_nested_for(code_elem, 1) or has_server(code_elem) or has_user_input(code_elem) or has_pygame(code_elem) or has_url(code_elem) or has_tk(code_elem) or has_while_true(code_elem):
         #code_output.append("HAS-USER-INPUT")
         continue
     try:
@@ -170,7 +171,16 @@ data_dict["code"] = cleaned_code_truth
 data_dict["output"] = cleaned_code_output
 
 df_cleaned = pd.DataFrame(data_dict)
-df_cleaned.to_csv("cleaned_data/train-00000-of-00001-8b6e212f3e1ece96.csv")
+
+#with open('./objects/df.pkl', 'wb') as f:
+#    pickle.dump(df_cleaned, f, pickle.HIGHEST_PROTOCOL)
+
+save_object(data_dict["instructions"], "./objects/instructions.pkl")
+save_object(data_dict["prompt"], "./objects/prompts.pkl")
+#save_object(df_cleaned, "./objects/df_data.pkl")
+#df_cleaned.to_csv("cleaned_data/train-00000-of-00001-8b6e212f3e1ece96.csv")
+
+
 
 #ev = get_evaluation(code_res[0], code_params[0], 15)
 #print(ev)
